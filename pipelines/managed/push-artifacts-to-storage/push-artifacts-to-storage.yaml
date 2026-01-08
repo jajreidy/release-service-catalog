@@ -267,6 +267,45 @@ spec:
         - input: $(tasks.collect-task-params.results.extractedValues[4])
           operator: notin
           values: ["promote"]
+    - name: push-artifacts-to-storage
+      taskRef:
+        resolver: "git"
+        params:
+          - name: url
+            value: $(params.taskGitUrl)
+          - name: revision
+            value: $(params.taskGitRevision)
+          - name: pathInRepo
+            value: tasks/managed/push-artifacts-to-storage/push-artifacts-to-storage.yaml
+      params:
+        - name: dataPath
+          value: "$(tasks.collect-data.results.data)"
+        - name: snapshotPath
+          value: "$(tasks.collect-data.results.snapshotSpec)"
+        - name: snapshotNamespace
+          value: "$(tasks.collect-data.results.snapshotNamespace)"
+        - name: snapshotBuildId
+          value: "$(tasks.collect-data.results.snapshotBuildId)"
+        - name: pipelineImage
+          value: $(tasks.collect-task-params.results.extractedValues[3])
+        - name: ociStorage
+          value: $(params.ociStorage)
+        - name: sourceDataArtifact
+          value: "$(tasks.reduce-snapshot.results.sourceDataArtifact)"
+        - name: dataDir
+          value: $(params.dataDir)
+        - name: taskGitUrl
+          value: "$(params.taskGitUrl)"
+        - name: taskGitRevision
+          value: "$(params.taskGitRevision)"
+        - name: trustedArtifactsDebug
+          value: "$(params.trustedArtifactsDebug)"
+      runAfter:
+        - collect-task-params
+      when:
+        - input: $(tasks.collect-task-params.results.extractedValues[4])
+          operator: notin
+          values: ["promote"]
     - name: update-package-collection-after-push-rpm-process
       taskRef:
         resolver: "git"
@@ -381,43 +420,6 @@ spec:
       when:
         - input: $(tasks.collect-task-params.results.extractedValues[4])
           operator: in
-          values: ["promote"]
-    - name: push-artifacts-to-storage
-      taskRef:
-        resolver: "git"
-        params:
-          - name: url
-            value: $(params.taskGitUrl)
-          - name: revision
-            value: $(params.taskGitRevision)
-          - name: pathInRepo
-            value: tasks/managed/push-artifacts-to-storage/push-artifacts-to-storage.yaml
-      params:
-        - name: dataPath
-          value: "$(tasks.collect-data.results.data)"
-        - name: snapshotPath
-          value: "$(tasks.collect-data.results.snapshotSpec)"
-        - name: snapshotNamespace
-          value: "$(tasks.collect-data.results.snapshotNamespace)"
-        - name: snapshotBuildId
-          value: "$(tasks.collect-data.results.snapshotBuildId)"
-        - name: ociStorage
-          value: $(params.ociStorage)
-        - name: sourceDataArtifact
-          value: "$(tasks.reduce-snapshot.results.sourceDataArtifact)"
-        - name: dataDir
-          value: $(params.dataDir)
-        - name: taskGitUrl
-          value: "$(params.taskGitUrl)"
-        - name: taskGitRevision
-          value: "$(params.taskGitRevision)"
-        - name: trustedArtifactsDebug
-          value: "$(params.trustedArtifactsDebug)"
-      runAfter:
-        - collect-task-params
-      when:
-        - input: $(tasks.collect-task-params.results.extractedValues[4])
-          operator: notin
           values: ["promote"]
   finally:
     - name: cleanup-internal-requests
